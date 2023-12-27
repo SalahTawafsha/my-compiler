@@ -1,7 +1,7 @@
 module program;
 	const
 	    pi = 3.14;
-	    exitNum = -1;
+	    exitNum = 1;
 	var
 	    count: integer;
 	    sum, avg : real;
@@ -14,16 +14,16 @@ module program;
 			readint(current);
 			if current = exitNum then
 				exit
-			elseif current = -2 then
-				
-			else  
+			elseif current = 2 then
+
+			else
 				sum := sum + current + ( 2-4 ) * 0;
 			writereal(sum);
 		end;
 	end sumProcedure;
 
 	begin
-		while 1 = 1 do 
+		while 1 = 1 do
 			call sumProcedure;
 	end;
 end program.
