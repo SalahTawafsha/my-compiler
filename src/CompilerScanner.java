@@ -1,10 +1,14 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Scanner;
 
-public class MyScanner {
+public class CompilerScanner {
     private final static HashSet<String> terminals;
     private final static HashSet<String> nonTerminals;
     private final static HashSet<String> reservedWords;
+    private final Scanner scanner;
 
     static {
         terminals = initializeSet(".", "module", ";", "begin", "end", "", "const", "var",
@@ -35,6 +39,14 @@ public class MyScanner {
         HashSet<String> set = new HashSet<>(values.length);
         Collections.addAll(set, values);
         return set;
+    }
+
+    public CompilerScanner(File input) {
+        try {
+            scanner = new Scanner(input);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String nextToken() {

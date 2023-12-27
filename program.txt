@@ -1,0 +1,29 @@
+module program;
+	const
+	    pi = 3.14;
+	    exitNum = -1;
+	var
+	    count: integer;
+	    sum, avg : real;
+	    ch : char;
+
+	procedure sumProcedure;
+		var
+		    current: integer;
+		begin
+			readint(current);
+			if current = exitNum then
+				exit
+			elseif current = -2 then
+				
+			else  
+				sum := sum + current + ( 2-4 ) * 0;
+			writereal(sum);
+		end;
+	end sumProcedure;
+
+	begin
+		while 1 = 1 do 
+			call sumProcedure;
+	end;
+end program.
