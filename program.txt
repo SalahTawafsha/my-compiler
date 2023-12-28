@@ -18,12 +18,13 @@ module program;
 
 			else
 				sum := sum + current + ( 2-4 ) * 0;
-			writereal(sum);
+		    end;
+			writereal(sum)
 		end;
-	end sumProcedure;
+	sumProcedure;
 
 	begin
 		while 1 = 1 do
 			call sumProcedure;
 	end;
-end program.
+program.

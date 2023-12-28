@@ -13,7 +13,7 @@ public class CompilerScanner {
     private String currLine = "";
 
     // to use it when I want to show Illegal character Error
-    private int currLineNumber = 1;
+    private int currLineNumber = 0;
 
     // constructor that I can pass file of MODULA-2 to it
     // and make Scanner on the file to be able to get tokens from it
@@ -25,6 +25,11 @@ public class CompilerScanner {
         }
     }
 
+    // function that returns token line to report error
+    public int getTokenLine() {
+        return currLineNumber;
+    }
+
     // method that will return token by token when I call it
     // when reach to end of line get new line and if not hasNextLine return EOF (End Of File)
     // this method is only method that public and can use for the object by get tokens until reach EOF
@@ -33,6 +38,7 @@ public class CompilerScanner {
             if (!scanner.hasNextLine()) // return EOF if no new line
                 return "EOF";
 
+            // do get new line until has line not empty and not blank OR reach to EOF
             // do get new line until has line not empty and not blank OR reach to EOF
             do {
                 currLine = scanner.nextLine();  // get new line
@@ -213,11 +219,11 @@ public class CompilerScanner {
             currentChar = getNextChar();
         } while (currentChar != null && (Character.isDigit(currentChar) || (!isReal && currentChar == '.')));
 
-        // add char in first to detect if number is read or integer
+        // add char at last to detect if number is real or integer
         if (isReal)
-            stringBuilder.insert(0, 'R');
+            stringBuilder.append('R');
         else
-            stringBuilder.insert(0, 'I');
+            stringBuilder.append('I');
 
         // if not reach end of line, Rollback to prev char to be able to get next of it
         // because nextToken() function will make get new char
