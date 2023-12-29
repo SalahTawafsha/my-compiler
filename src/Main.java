@@ -66,7 +66,7 @@ public class Main  {
         CompilerParser compilerParser = new CompilerParser(input);
         try {
             compilerParser.parse();
-        } catch (ParserConfigurationException ex) {
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
 
