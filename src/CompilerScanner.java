@@ -46,8 +46,8 @@ public class CompilerScanner {
                 currIndex = -1;                 // reset index
             } while ((currLine.isEmpty() || currLine.isBlank()) && scanner.hasNextLine());
 
-            // if reached to EOF by previous loop, return EOF
-            if (!scanner.hasNextLine())
+            // if after previous loop line is empty so, we reach EOF
+            if (currLine.isEmpty() || currLine.isBlank())
                 return "EOF";
 
         }

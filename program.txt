@@ -20,11 +20,12 @@ module program;
 				sum := sum + current + ( 2-4 ) * 0;
 		    end;
 			writereal(sum)
-		end;
+		end
 	sumProcedure;
 
 	begin
 		while 1 = 1 do
 			call sumProcedure;
-	end;
+	    end
+	end
 program.
