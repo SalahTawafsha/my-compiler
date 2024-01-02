@@ -25,6 +25,10 @@ public class CompilerScanner {
         }
     }
 
+    public String getCurrLine() {
+        return currLine;
+    }
+
     // function that returns token line to report error
     public int getTokenLine() {
         return currLineNumber;

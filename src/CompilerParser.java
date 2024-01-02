@@ -27,10 +27,10 @@ public class CompilerParser {
     }
 
     // store module name to validate with end of module
-    private String moduleName;
+    private String moduleName = "";
 
     // store procedure name to validate with end of procedure
-    private String procedureName;
+    private String procedureName = "";
 
     public CompilerParser(File input) {
         // pass file in constructor to parse it
@@ -248,8 +248,6 @@ public class CompilerParser {
         block(); // validate block of procedure
         procedureName(); // validate "name ;"
         getNextToken(); // get next token to check it
-        simiColon(); // validate ";"
-        getNextToken(); // get next token to check it
     }
 
     private void procedureHeading() throws ParserException {
@@ -276,6 +274,8 @@ public class CompilerParser {
                     " you must use name that you entered in procedure-heading that is \"" + procedureName + "\""
                     + ", and on line " + scanner.getTokenLine() + " You are using " + currentToken);
 
+        getNextToken();
+        simiColon();
     }
 
     private void stmtList(boolean isInsideIfStatement) throws ParserException {
@@ -314,7 +314,6 @@ public class CompilerParser {
             getNextToken();
         } else if (Character.isLetter(currentToken.charAt(0)) && !reservedWords.contains(currentToken)) {
             assignStatement();
-            getNextToken();
         }
 
         // isInsideIfStatement to know if follow of statement can be elseif or else
@@ -331,16 +330,13 @@ public class CompilerParser {
         getNextToken();
         if (!currentToken.equals(":="))
             throw new ParserException("You must use := in assignment statement, on line " + scanner.getTokenLine());
-
-
         getNextToken();
+
         exp();
     }
 
     private void exp() throws ParserException {
         term();
-        getNextToken();
-
         // take new term when have + or -
         while (isAddOperation()) {
             getNextToken();
@@ -350,8 +346,6 @@ public class CompilerParser {
 
     private void term() throws ParserException {
         factor();
-        getNextToken();
-
         // take new factor when has * | / | mod | div
         while (isMultiplyOperation()) {
             getNextToken();
@@ -429,7 +423,7 @@ public class CompilerParser {
     }
 
     private void writeList() throws ParserException {
-        nameValue();// validate name = value
+        nameValue();// validate name | value
         getNextToken();
 
         // while token is a name validate const items
@@ -530,7 +524,15 @@ public class CompilerParser {
 
     private void call() throws ParserException {
         getNextToken();
-        name();
+        callProcedureName(); // validate if we call declared procedure
+    }
+
+    private void callProcedureName() {
+        if (!currentToken.equals(procedureName))
+            throw new ParserException("When you ending procedure," +
+                    " you must use name that you entered in procedure-heading that is \"" + procedureName + "\""
+                    + ", and on line " + scanner.getTokenLine() + " You are using " + currentToken);
+
     }
 
     private void condition() throws ParserException {
