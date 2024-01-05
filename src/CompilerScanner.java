@@ -17,16 +17,8 @@ public class CompilerScanner {
 
     // constructor that I can pass file of MODULA-2 to it
     // and make Scanner on the file to be able to get tokens from it
-    public CompilerScanner(File input) {
-        try {
-            scanner = new Scanner(input);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String getCurrLine() {
-        return currLine;
+    public CompilerScanner(File input) throws FileNotFoundException {
+        scanner = new Scanner(input);
     }
 
     // function that returns token line to report error
@@ -181,7 +173,7 @@ public class CompilerScanner {
             // throw an exception when have char that not one of terminals
             // and the exception will have line and char that has problem
             default:
-                throw new IllegalArgumentException("Illegal character on line + " + currLineNumber + " That is: '" + currLine.charAt(currIndex) + "'");
+                throw new IllegalArgumentException("Illegal character on line " + currLineNumber + " That is: '" + currLine.charAt(currIndex) + "'");
         }
     }
 
@@ -222,12 +214,6 @@ public class CompilerScanner {
             stringBuilder.append(currentChar);
             currentChar = getNextChar();
         } while (currentChar != null && (Character.isDigit(currentChar) || (!isReal && currentChar == '.')));
-
-        // add char at last to detect if number is real or integer
-        if (isReal)
-            stringBuilder.append('R');
-        else
-            stringBuilder.append('I');
 
         // if not reach end of line, Rollback to prev char to be able to get next of it
         // because nextToken() function will make get new char
@@ -275,16 +261,6 @@ public class CompilerScanner {
         else {
             rollbackChar();
             return ":";
-        }
-    }
-
-    public static void main(String[] args) {
-        CompilerScanner compilerScanner = new CompilerScanner(new File("program.txt"));
-        String token = compilerScanner.nextToken();
-
-        while (!token.equals("EOF")) {
-            System.out.println(token);
-            token = compilerScanner.nextToken();
         }
     }
 }
