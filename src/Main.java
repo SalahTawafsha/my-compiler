@@ -7,7 +7,7 @@ public class Main {
         Scanner fileNamesScanner = new Scanner(System.in);
         while (true) {  // loop to read all files without run each time
 
-            System.out.println("Enter file path:");
+            System.out.println("Enter file path or \"exit\" to end program:");
             String filePath = fileNamesScanner.nextLine();
 
             if (filePath.equals("exit")) // loop will stop when enter exit as file path

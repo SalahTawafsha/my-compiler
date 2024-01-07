@@ -31,8 +31,10 @@ public class CompilerScanner {
     // this method is only method that public and can use for the object by get tokens until reach EOF
     public String nextToken() {
         if (currIndex == currLine.length() - 1) { // end of line
-            if (!scanner.hasNextLine()) // return EOF if no new line
+            if (!scanner.hasNextLine()) { // return EOF if no new line
+                scanner.close();
                 return "EOF";
+            }
 
             // do get new line until has line not empty and not blank OR reach to EOF
             // do get new line until has line not empty and not blank OR reach to EOF
@@ -43,8 +45,10 @@ public class CompilerScanner {
             } while ((currLine.isEmpty() || currLine.isBlank()) && scanner.hasNextLine());
 
             // if after previous loop line is empty so, we reach EOF
-            if (currLine.isEmpty() || currLine.isBlank())
+            if (currLine.isEmpty() || currLine.isBlank()) {
+                scanner.close();
                 return "EOF";
+            }
 
         }
 
@@ -191,8 +195,7 @@ public class CompilerScanner {
 
         // if not reach end of line, Rollback to prev char to be able to get next of it
         // because nextToken() function will make get new char
-        if (currentChar != null)
-            rollbackChar();
+        if (currentChar != null) rollbackChar();
 
         // finally return name
         return stringBuilder.toString();
@@ -217,8 +220,7 @@ public class CompilerScanner {
 
         // if not reach end of line, Rollback to prev char to be able to get next of it
         // because nextToken() function will make get new char
-        if (currentChar != null)
-            rollbackChar();
+        if (currentChar != null) rollbackChar();
 
         // finally return number
         return stringBuilder.toString();
@@ -226,8 +228,7 @@ public class CompilerScanner {
 
     private String getGreaterThan() { // if next char is = then return >= otherwise make Rollback and return >
         Character nextChar = getNextChar();
-        if (nextChar != null && nextChar == '=')
-            return ">=";
+        if (nextChar != null && nextChar == '=') return ">=";
         else {
             rollbackChar();
             return ">";
@@ -236,8 +237,7 @@ public class CompilerScanner {
 
     private String getLessThan() {// if next char is = then return <= otherwise make Rollback and return <
         Character nextChar = getNextChar();
-        if (nextChar != null && nextChar == '=')
-            return "<=";
+        if (nextChar != null && nextChar == '=') return "<=";
         else {
             rollbackChar();
             return "<";
@@ -247,8 +247,7 @@ public class CompilerScanner {
     // if there are | so it must be followed with =, otherwise it Illegal character
     private String getPipeEqual() throws IllegalArgumentException {
         Character nextChar = getNextChar();
-        if (nextChar != null && nextChar == '=')
-            return "|=";
+        if (nextChar != null && nextChar == '=') return "|=";
         else {
             throw new IllegalArgumentException("Illegal character on line + " + currLineNumber + " That is: | can't be written without =");
         }
@@ -256,8 +255,7 @@ public class CompilerScanner {
 
     private String getColon() { // if next char is = then return := otherwise make Rollback and return :
         Character nextChar = getNextChar();
-        if (nextChar != null && nextChar == '=')
-            return ":=";
+        if (nextChar != null && nextChar == '=') return ":=";
         else {
             rollbackChar();
             return ":";
