@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner fileNamesScanner = new Scanner(System.in);
-        while (true) {  // loop to read all files without run each time
+        while (true) {  // loop to read all testing.files without run each time
 
             System.out.println("Enter file path or \"exit\" to end program:");
             String filePath = fileNamesScanner.nextLine();

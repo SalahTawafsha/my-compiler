@@ -57,13 +57,13 @@ public class CompilerParser {
 
         // finally, validate has "."
         if (!currentToken.equals("."))
-            throw new ParserException("File Must end with \".\", on line " + scanner.getTokenLine());
+            throw new ParserException("File Must end with \".\" not \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
         // validate if "." is last token
         // here I added EOF to production rules to can get follow of module-decl
         getNextToken();
         if (!currentToken.equals("EOF"))
-            throw new ParserException("File Must end on \".\" and nothing after, (on line " + scanner.getTokenLine() + ")");
+            throw new ParserException("File Must end on \".\" and you have \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
     }
 
@@ -71,7 +71,7 @@ public class CompilerParser {
         // validate "module name ;"
 
         if (!currentToken.equals("module"))
-            throw new ParserException("File Must start with \"module\", on line " + scanner.getTokenLine());
+            throw new ParserException("File Must start with \"module\" not \"" + currentToken + "\", on line " + scanner.getTokenLine());
         getNextToken();
 
         name();
@@ -86,14 +86,14 @@ public class CompilerParser {
         // validate "begin stmt-list end"
 
         if (!currentToken.equals("begin"))
-            throw new ParserException("you must make block and it must started with \"begin\", on line " + scanner.getTokenLine());
+            throw new ParserException("you must make block and it must started with \"begin\" not \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
         getNextToken();
         // validate "statement ( ; statement )*"
         stmtList();
 
         if (!currentToken.equals("end"))
-            throw new ParserException("you must end block here using \"end\", on line " + scanner.getTokenLine());
+            throw new ParserException("you must end block here using \"end\" not \"" + currentToken + "\", on line " + scanner.getTokenLine());
         getNextToken();
     }
 
@@ -159,12 +159,12 @@ public class CompilerParser {
 
         getNextToken();
         if (!currentToken.equals("="))
-            throw new ParserException("When you are declaring const item," + " you must use '=' between name and value, on line " + scanner.getTokenLine());
+            throw new ParserException("When you are declaring const item, you must use '=' between name and value not \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
         getNextToken();
         // value is number so must start with digit
         if (!Character.isDigit(currentToken.charAt(0)))
-            throw new ParserException("When you are declaring const item," + " value must be integer or real, on line " + scanner.getTokenLine());
+            throw new ParserException("When you are declaring const item, value must be a number and \"" + currentToken + "\" not a number, on line " + scanner.getTokenLine());
 
         getNextToken();
         simiColon();
@@ -216,7 +216,7 @@ public class CompilerParser {
         nameList();
 
         if (!currentToken.equals(":"))
-            throw new ParserException("When you are declaring var item" + " you must use ':' between names and value, on line " + scanner.getTokenLine());
+            throw new ParserException("When you are declaring var item you must use ':' between names and value not \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
         getNextToken();
         dataType();
@@ -237,7 +237,7 @@ public class CompilerParser {
 
     private void dataType() throws ParserException {
         if (!currentToken.equals("integer") && !currentToken.equals("real") && !currentToken.equals("char"))
-            throw new ParserException("You must select data type that is (integer or real or char)," + " on line " + scanner.getTokenLine());
+            throw new ParserException("You must select data type that is (integer or real or char) not \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
         getNextToken();
     }
@@ -261,7 +261,7 @@ public class CompilerParser {
         // validate "procedure name ;"
 
         if (!currentToken.equals("procedure"))
-            throw new ParserException("Procedure heading must start with \"procedure\", on line " + scanner.getTokenLine());
+            throw new ParserException("Procedure heading must start with \"procedure\" not \"" + currentToken + "\", on line " + scanner.getTokenLine());
 
         getNextToken();
         name();
@@ -276,7 +276,7 @@ public class CompilerParser {
         // validate name that must be same as procedure-heading
 
         if (!currentToken.equals(procedureName))
-            throw new ParserException("When you ending procedure," + " you must use name that you entered in procedure-heading that is \"" + procedureName + "\"" + ", and on line " + scanner.getTokenLine() + " You are using " + currentToken);
+            throw new ParserException("When you ending procedure, you must use name that you entered in procedure-heading that is \"" + procedureName + "\"" + ", and on line " + scanner.getTokenLine() + " You are using " + currentToken);
 
         getNextToken();
     }
@@ -324,7 +324,7 @@ public class CompilerParser {
         name();
         getNextToken();
         if (!currentToken.equals(":="))
-            throw new ParserException("You must use := in assignment statement, on line " + scanner.getTokenLine());
+            throw new ParserException("You must use := in assignment statement not \"" + currentToken + "\", on line " + scanner.getTokenLine());
         getNextToken();
 
         exp(); // validate "term ( add-oper term )*"
@@ -363,7 +363,7 @@ public class CompilerParser {
             exp();
 
             if (!currentToken.equals(")"))
-                throw new ParserException("You must close bracket in this statement, on line " + scanner.getTokenLine());
+                throw new ParserException("You must close bracket in this statement, on line " + scanner.getTokenLine() + " before \"" + currentToken + "\"");
 
             getNextToken();
         } else if (Character.isDigit(currentToken.charAt(0))) {
@@ -397,14 +397,14 @@ public class CompilerParser {
 
         getNextToken();
         if (!currentToken.equals("("))
-            throw new ParserException("This is read statement and you must add '(' before names, on line " + scanner.getTokenLine());
+            throw new ParserException("This is read statement and you must have '(' after it, on line " + scanner.getTokenLine() + " before \"" + currentToken + "\"");
 
         getNextToken();
         // validate name ( , name )*
         nameList();
 
         if (!currentToken.equals(")"))
-            throw new ParserException("This is read statement and you must add ')' after names, on line " + scanner.getTokenLine());
+            throw new ParserException("This is read statement and you must have ')' after it, on line " + scanner.getTokenLine() + " before \"" + currentToken + "\"");
 
         getNextToken();
     }
@@ -425,14 +425,14 @@ public class CompilerParser {
 
         getNextToken();
         if (!currentToken.equals("("))
-            throw new ParserException("This is write statement and you must add '(' before names, on line " + scanner.getTokenLine());
+            throw new ParserException("This is write statement and you must have '(' before names, on line " + scanner.getTokenLine() + " before \"" + currentToken + "\"");
 
         getNextToken();
         // validate "write-item ( , write-item )*"
         writeList();
 
         if (!currentToken.equals(")"))
-            throw new ParserException("This is write statement and you must add ')' after names, on line " + scanner.getTokenLine());
+            throw new ParserException("This is write statement and you must have ')' after names, on line " + scanner.getTokenLine() + " before \"" + currentToken + "\"");
 
         getNextToken();
     }
@@ -473,7 +473,7 @@ public class CompilerParser {
         condition();
 
         if (!currentToken.equals("then"))
-            throw new ParserException("You must have \"then\" after condition of if, on line " + scanner.getTokenLine());
+            throw new ParserException("You must have \"then\" not \"" + currentToken + "\" after condition of if statement, on line " + scanner.getTokenLine());
 
         getNextToken();
         // validate "statement ( ; statement )*"
@@ -485,7 +485,7 @@ public class CompilerParser {
         if (currentToken.equals("else")) elsePart(); // validate "else stmt-list | lambda"
 
         if (!currentToken.equals("end"))
-            throw new ParserException("You must have \"end\" after if statement, on line " + scanner.getTokenLine());
+            throw new ParserException("You must have \"end\" not \"" + currentToken + "\" after if statement, on line " + scanner.getTokenLine());
 
         getNextToken();
     }
@@ -499,7 +499,7 @@ public class CompilerParser {
         condition();
 
         if (!currentToken.equals("then"))
-            throw new ParserException("You must have \"then\" after condition of else if, on line " + scanner.getTokenLine());
+            throw new ParserException("You must have \"then\" not \"" + currentToken + "\" after condition of else if, on line " + scanner.getTokenLine());
 
         getNextToken();
         // validate "statement ( ; statement )*"
@@ -524,14 +524,14 @@ public class CompilerParser {
         condition();
 
         if (!currentToken.equals("do"))
-            throw new ParserException("You must have \"do\" after condition of while, on line " + scanner.getTokenLine());
+            throw new ParserException("You must have \"do\" not \"" + currentToken + "\" after condition of while, on line " + scanner.getTokenLine());
 
         getNextToken();
         // validate "statement ( ; statement )*"
         stmtList();
 
         if (!currentToken.equals("end"))
-            throw new ParserException("You must have \"end\" of while after statements, on line " + scanner.getTokenLine());
+            throw new ParserException("You must have \"end\" not \"" + currentToken + "\" of while after statements, on line " + scanner.getTokenLine());
 
         getNextToken();
     }
@@ -545,7 +545,7 @@ public class CompilerParser {
         stmtList();
 
         if (!currentToken.equals("until"))
-            throw new ParserException("You must have \"until\" after statements of repeat statement, on line " + scanner.getTokenLine());
+            throw new ParserException("You must have \"until\" not \"" + currentToken + "\" after statements of repeat statement, on line " + scanner.getTokenLine());
 
         getNextToken();
         // validate "name-value relational-operation name-value"
@@ -562,7 +562,7 @@ public class CompilerParser {
 
     private void callProcedureName() {
         if (!currentToken.equals(procedureName))
-            throw new ParserException("When you ending procedure," + " you must use name that you entered in procedure-heading that is \"" + procedureName + "\"" + ", and on line " + scanner.getTokenLine() + " You are using " + currentToken);
+            throw new ParserException("When you are ending procedure, you must use name that you entered in procedure-heading that is \"" + procedureName + "\"" + ", and on line " + scanner.getTokenLine() + " You are using " + currentToken);
 
     }
 
@@ -576,7 +576,7 @@ public class CompilerParser {
 
     private void relationOperation() throws ParserException {
         if (!currentToken.equals("=") && !currentToken.equals("|=") && !currentToken.equals("<") && !currentToken.equals("<=") && !currentToken.equals(">") && !currentToken.equals(">="))
-            throw new ParserException("You must has valid operation here (=, |=, <, <=, >, >=) on line " + scanner.getTokenLine());
+            throw new ParserException("You must has one of operations here, valid operations is {=, |=, <, <=, >, >=} and you are using \"" + currentToken + "\" on line " + scanner.getTokenLine());
 
         getNextToken();
     }
@@ -596,7 +596,7 @@ public class CompilerParser {
     private void moduleName() throws ParserException {
         // validate that name in end of module is same as module-heading
         if (!currentToken.equals(moduleName))
-            throw new ParserException("When you ending module," + " you must use name that you entered in module-heading that is \"" + moduleName + "\"" + ", on line " + scanner.getTokenLine() + " You are using end " + currentToken);
+            throw new ParserException("When you ending module, you must use name that you entered in module-heading that is \"" + moduleName + "\"" + ", on line " + scanner.getTokenLine() + " You are using end " + currentToken);
 
         getNextToken();
     }
