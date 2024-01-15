@@ -13,7 +13,7 @@ public class CompilerScanner {
     private String currLine = "";
 
     // to use it when I want to show Illegal character Error
-    private int currLineNumber = 0;
+    private int lineOfToken = 0;
 
     // constructor that I can pass file of MODULA-2 to it
     // and make Scanner on the file to be able to get tokens from it
@@ -22,32 +22,31 @@ public class CompilerScanner {
     }
 
     // function that returns token line to report error
-    public int getTokenLine() {
-        return currLineNumber;
+    public int getLineOfToken() {
+        return lineOfToken;
     }
 
     // method that will return token by token when I call it
-    // when reach to end of line get new line and if not hasNextLine return EOF (End Of File)
-    // this method is only method that public and can use for the object by get tokens until reach EOF
+    // when reach to end of line get new line and if not hasNextLine return empty string (End Of File)
+    // this method is only method that is public and can use by instance to get tokens until reach empty string (EOF)
     public String nextToken() {
         if (currIndex == currLine.length() - 1) { // end of line
-            if (!scanner.hasNextLine()) { // return EOF if no new line
+            if (!scanner.hasNextLine()) { // close scanner and return empty string if no new line
                 scanner.close();
-                return "EOF";
+                return "";
             }
 
             // do get new line until has line not empty and not blank OR reach to EOF
-            // do get new line until has line not empty and not blank OR reach to EOF
             do {
                 currLine = scanner.nextLine();  // get new line
-                currLineNumber++;               // increment line number
+                lineOfToken++;               // increment line number
                 currIndex = -1;                 // reset index
             } while ((currLine.isEmpty() || currLine.isBlank()) && scanner.hasNextLine());
 
             // if after previous loop line is empty so, we reach EOF
             if (currLine.isEmpty() || currLine.isBlank()) {
                 scanner.close();
-                return "EOF";
+                return "";
             }
 
         }
@@ -110,74 +109,16 @@ public class CompilerScanner {
                 return getLessThan();
             case '>':
                 return getGreaterThan();
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                return getNumber();
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-            case 'G':
-            case 'H':
-            case 'I':
-            case 'J':
-            case 'K':
-            case 'L':
-            case 'M':
-            case 'N':
-            case 'O':
-            case 'P':
-            case 'Q':
-            case 'R':
-            case 'S':
-            case 'T':
-            case 'U':
-            case 'V':
-            case 'W':
-            case 'X':
-            case 'Y':
-            case 'Z':
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e':
-            case 'f':
-            case 'g':
-            case 'h':
-            case 'i':
-            case 'j':
-            case 'k':
-            case 'l':
-            case 'm':
-            case 'n':
-            case 'o':
-            case 'p':
-            case 'q':
-            case 'r':
-            case 's':
-            case 't':
-            case 'u':
-            case 'v':
-            case 'w':
-            case 'x':
-            case 'y':
-            case 'z':
-                return getName();
-            // throw an exception when have char that not one of terminals
-            // and the exception will have line and char that has problem
             default:
-                throw new IllegalArgumentException("Illegal character on line " + currLineNumber + " That is: '" + currLine.charAt(currIndex) + "'");
+                // when reach default it must be letter or digit
+
+                // if it is digit call getNumber() method
+                if (Character.isDigit(currLine.charAt(currIndex)))
+                    return getNumber();
+                else if (Character.isLetter(currLine.charAt(currIndex))) // if it is letter call getName() method
+                    return getName();
+                else
+                    throw new IllegalArgumentException("Illegal character Error: line " + lineOfToken + " has Illegal character '" + currLine.charAt(currIndex) + "'");
         }
     }
 
@@ -191,7 +132,7 @@ public class CompilerScanner {
         do {
             stringBuilder.append(currentChar);
             currentChar = getNextChar();
-        } while (currentChar != null && (Character.isDigit(currentChar) || Character.isLetter(currentChar)));
+        } while (currentChar != null && Character.isLetterOrDigit(currentChar));
 
         // if not reach end of line, Rollback to prev char to be able to get next of it
         // because nextToken() function will make get new char
@@ -249,7 +190,7 @@ public class CompilerScanner {
         Character nextChar = getNextChar();
         if (nextChar != null && nextChar == '=') return "|=";
         else {
-            throw new IllegalArgumentException("Illegal character on line + " + currLineNumber + " That is: | can't be written without =");
+            throw new IllegalArgumentException("Illegal character Error: line " + lineOfToken + " has Illegal character '" + currLine.charAt(currIndex) + "'");
         }
     }
 
@@ -259,6 +200,15 @@ public class CompilerScanner {
         else {
             rollbackChar();
             return ":";
+        }
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        CompilerScanner compilerScanner = new CompilerScanner(new File("all.txt"));
+        String token = compilerScanner.nextToken();
+        while (!token.isEmpty()) {
+            System.out.println(token);
+            token = compilerScanner.nextToken();
         }
     }
 }

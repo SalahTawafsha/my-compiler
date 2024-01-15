@@ -40,7 +40,7 @@ var
             writechar(dfgdgdfgfd,dfgd4423432,22);
         end;
 
-        name := hello * 324 + sgsfgFS + 32423;
+        name := hello*324+sgsfgFS+32423;
         hi := 32423 * 32423 + 32423 - (12 * 4 div 12 mod 3 / 2);
 
         if 50 > h then
@@ -65,7 +65,7 @@ var
             exit
         end
     end
-  p1;
+  ps1;
 
  begin
     call p1;
