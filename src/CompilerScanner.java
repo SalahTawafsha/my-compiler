@@ -117,9 +117,15 @@ public class CompilerScanner {
                     return getNumber();
                 else if (Character.isLetter(currLine.charAt(currIndex))) // if it is letter call getName() method
                     return getName();
-                else
+                else {
+                    close();
                     throw new IllegalArgumentException("Illegal character Error: line " + lineOfToken + " has Illegal character '" + currLine.charAt(currIndex) + "'");
+                }
         }
+    }
+
+    public void close() {
+        scanner.close();
     }
 
     private String getName() {
@@ -159,6 +165,11 @@ public class CompilerScanner {
             currentChar = getNextChar();
         } while (currentChar != null && (Character.isDigit(currentChar) || (!isReal && currentChar == '.')));
 
+        // if not reach to final state that is digit so, it must be Illegal character
+        if (!Character.isDigit(stringBuilder.charAt(stringBuilder.length() - 1))) {
+            close();
+            throw new IllegalArgumentException("Illegal character Error: line " + lineOfToken + " has Illegal token '" + stringBuilder + "'");
+        }
         // if not reach end of line, Rollback to prev char to be able to get next of it
         // because nextToken() function will make get new char
         if (currentChar != null) rollbackChar();
@@ -190,6 +201,7 @@ public class CompilerScanner {
         Character nextChar = getNextChar();
         if (nextChar != null && nextChar == '=') return "|=";
         else {
+            close();
             throw new IllegalArgumentException("Illegal character Error: line " + lineOfToken + " has Illegal character '" + currLine.charAt(currIndex) + "'");
         }
     }

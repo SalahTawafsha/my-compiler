@@ -65,7 +65,7 @@ var
             exit
         end
     end
-  ps1;
+  p1;
 
  begin
     call p1;

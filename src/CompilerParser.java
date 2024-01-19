@@ -47,7 +47,7 @@ public class CompilerParser {
         // validate "module name ;"
         moduleHeading();
         // validate "const-decl var-decl"
-        declarations(true); // "true" since its module declarations
+        declarations();
         // validate "procedure-heading declarations block name ;"
         procedureDecl();
         // validate "begin stmt-list end"
@@ -56,22 +56,26 @@ public class CompilerParser {
         moduleName();
 
         // finally, validate has "."
-        if (!currentToken.equals("."))
+        if (!currentToken.equals(".")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "File must end with \".\" not with \"" + currentToken + "\".");
-
+        }
         // validate if "." is last token
         // here check if there is any token after "." and throw error
         getNextToken();
-        if (!currentToken.isEmpty())
-            throw new ParserException(scanner.getLineOfToken(), "File must not have any token after \".\" and this file have \"" + currentToken + "\".");
-
+        if (!currentToken.isEmpty()) {
+            scanner.close();
+            throw new ParserException(scanner.getLineOfToken(), "File must not have any token after \".\" and you have \"" + currentToken + "\" after \".\"");
+        }
     }
 
     private void moduleHeading() throws ParserException {
         // validate "module name ;"
 
-        if (!currentToken.equals("module"))
+        if (!currentToken.equals("module")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must start module with \"module\" not \"" + currentToken + "\".");
+        }
         getNextToken();
 
         name();
@@ -85,71 +89,72 @@ public class CompilerParser {
     private void block() throws ParserException {
         // validate "begin stmt-list end"
 
-        if (!currentToken.equals("begin"))
+        if (!currentToken.equals("begin")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must start block here with \"begin\" not \"" + currentToken + "\".");
-
+        }
         getNextToken();
         // validate "statement ( ; statement )*"
         stmtList();
 
-        if (!currentToken.equals("end"))
+        if (!currentToken.equals("end")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must end block here with \"end\" not \"" + currentToken + "\"");
+        }
         getNextToken();
     }
 
     private void simiColon() throws ParserException {
         // validate ";"
-        if (!currentToken.equals(";"))
+        if (!currentToken.equals(";")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must end statement with \";\" before \"" + currentToken + "\"");
-
+        }
         getNextToken();
     }
 
-    private void declarations(boolean isModuleDeclarations) throws ParserException {
+    private void declarations() throws ParserException {
         // validate "const-decl var-decl"
-        // and I added isModuleDeclarations boolean for:
-        // if true so its declarations of module, otherwise its for procedure
-        // this will help to know if follow of declarations is ("procedure" || "begin")
 
         // validate "const const-list | lambda"
-        constDeclarations(isModuleDeclarations);
+        constDeclarations();
 
 
         // validate "var var-list | lambda"
-        varDeclarations(isModuleDeclarations);
+        varDeclarations();
 
     }
 
-    private void constDeclarations(boolean isModuleDeclarations) throws ParserException {
+    private void constDeclarations() throws ParserException {
         // validate "const const-list | lambda"
 
         // if token is const so call const-list, otherwise its lambda
         if (currentToken.equals("const")) {
             getNextToken();
             // validate "( name = value ; )*"
-            constList(isModuleDeclarations);
+            constList();
         }
     }
 
-    private void constList(boolean isModuleDeclarations) throws ParserException {
+    private void constList() throws ParserException {
         // validate "( name = value ; )*"
 
 
         // validate "name = value;"
         constItem();
 
-        if (isModuleDeclarations) { // if this is module declaration so loop until find var or procedure
+//        if (isModuleDeclarations) { // if this is module declaration so loop until find var or procedure
 
-            // while token is a name validate const items
-            while (!currentToken.equals("var") && !currentToken.equals("procedure"))
-                constItem(); // validate "name = value;"
+        // while token is a name validate const items
+        while (!currentToken.equals("var") && !currentToken.equals("procedure") && !currentToken.equals("begin"))
+            constItem(); // validate "name = value;"
 
-        } else { // else, it's procedure declaration so loop until find var or begin
-
-            // while token is a name validate const items
-            while (!currentToken.equals("var") && !currentToken.equals("begin"))
-                constItem(); // validate "name = value;"
-        }
+//        } else { // else, it's procedure declaration so loop until find var or begin
+//
+//            // while token is a name validate const items
+//            while (!currentToken.equals("var") && !currentToken.equals("begin"))
+//                constItem(); // validate "name = value;"
+//        }
     }
 
     private void constItem() throws ParserException {
@@ -158,31 +163,33 @@ public class CompilerParser {
         name();
 
         getNextToken();
-        if (!currentToken.equals("="))
+        if (!currentToken.equals("=")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "When you are declaring const item, you must use '=' between name and value not \"" + currentToken + "\"");
-
+        }
         getNextToken();
         // value is number so must start with digit
-        if (!Character.isDigit(currentToken.charAt(0)))
+        if (!Character.isDigit(currentToken.charAt(0))) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "Value must be number and can't be \"" + currentToken + "\"");
-
+        }
         getNextToken();
         simiColon();
 
     }
 
-    private void varDeclarations(boolean isModuleDeclarations) throws ParserException {
+    private void varDeclarations() throws ParserException {
         // validate "var var-list | lambda"
 
         // if token is var so call var-list, otherwise its lambda
         if (currentToken.equals("var")) {
             getNextToken();
             // validate "( var-item ; )*"
-            varList(isModuleDeclarations);
+            varList();
         }
     }
 
-    private void varList(boolean isModuleDeclarations) throws ParserException {
+    private void varList() throws ParserException {
         // validate "( var-item ; )*"
 
         // validate name-list : data-type
@@ -190,21 +197,12 @@ public class CompilerParser {
         // validate ";"
         simiColon();
 
-        if (isModuleDeclarations) { // if this is module declaration so loop until find procedure
-            // while token is a name validate const items
-            while (!currentToken.equals("procedure")) {
-                // validate name-list : data-type
-                varItem();
-                // validate ";"
-                simiColon();
-            }
-        } else { // otherwise, it's procedure declaration so loop until find begin
-            while (!currentToken.equals("begin")) {
-                // validate name-list : data-type
-                varItem();
-                // validate ";"
-                simiColon();
-            }
+        // while token is not follow var-list validate const items
+        while (!currentToken.equals("procedure") && !currentToken.equals("begin")) {
+            // validate name-list : data-type
+            varItem();
+            // validate ";"
+            simiColon();
         }
 
     }
@@ -215,9 +213,10 @@ public class CompilerParser {
         // validate name ( , name )*
         nameList();
 
-        if (!currentToken.equals(":"))
+        if (!currentToken.equals(":")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must use ':' after name-list not \"" + currentToken + "\"");
-
+        }
         getNextToken();
         dataType();
     }
@@ -236,9 +235,10 @@ public class CompilerParser {
     }
 
     private void dataType() throws ParserException {
-        if (!currentToken.equals("integer") && !currentToken.equals("real") && !currentToken.equals("char"))
+        if (!currentToken.equals("integer") && !currentToken.equals("real") && !currentToken.equals("char")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must use one of data types {integer, real, char} not \"" + currentToken + "\"");
-
+        }
         getNextToken();
     }
 
@@ -248,7 +248,7 @@ public class CompilerParser {
         // validate "procedure name ;"
         procedureHeading();
         // validate declarations of procedure, false is for procedure declarations
-        declarations(false);
+        declarations();
         // validate block of procedure
         block();
         // validate name
@@ -260,9 +260,10 @@ public class CompilerParser {
     private void procedureHeading() throws ParserException {
         // validate "procedure name ;"
 
-        if (!currentToken.equals("procedure"))
+        if (!currentToken.equals("procedure")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must start procedure here using \"procedure\" not \"" + currentToken + "\"");
-
+        }
         getNextToken();
         name();
 
@@ -275,9 +276,10 @@ public class CompilerParser {
     private void procedureName() throws ParserException {
         // validate name that must be same as procedure-heading
 
-        if (!currentToken.equals(procedureName))
-            throw new ParserException(scanner.getLineOfToken(), "When you are ending procedure, you must use name that you entered in procedure-heading that is \"" + procedureName + "\"" + ", and you are using \"" + currentToken+"\".");
-
+        if (!currentToken.equals(procedureName)) {
+            scanner.close();
+            throw new ParserException(scanner.getLineOfToken(), "When you are ending procedure, you must use name that you entered in procedure-heading that is \"" + procedureName + "\"" + ", and you are using \"" + currentToken + "\".");
+        }
         getNextToken();
     }
 
@@ -323,9 +325,10 @@ public class CompilerParser {
         // validate "name := exp"
         name();
         getNextToken();
-        if (!currentToken.equals(":="))
+        if (!currentToken.equals(":=")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must use \":=\" for assignment statement not \"" + currentToken + "\"");
-        getNextToken();
+        }        getNextToken();
 
         exp(); // validate "term ( add-oper term )*"
     }
@@ -362,9 +365,10 @@ public class CompilerParser {
             getNextToken();
             exp();
 
-            if (!currentToken.equals(")"))
+            if (!currentToken.equals(")")) {
+                scanner.close();
                 throw new ParserException(scanner.getLineOfToken(), "You must use \")\" before \"" + currentToken + "\" to close opened bracket");
-
+            }
             getNextToken();
         } else if (Character.isDigit(currentToken.charAt(0))) {
             getNextToken();
@@ -396,16 +400,18 @@ public class CompilerParser {
         }
 
         getNextToken();
-        if (!currentToken.equals("("))
+        if (!currentToken.equals("(")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "This is read statement and you must have \"(\" before \"" + currentToken + "\"");
-
+        }
         getNextToken();
         // validate name ( , name )*
         nameList();
 
-        if (!currentToken.equals(")"))
+        if (!currentToken.equals(")")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "This is read statement and you must have \")\" after names, before \"" + currentToken + "\"");
-
+        }
         getNextToken();
     }
 
@@ -424,16 +430,18 @@ public class CompilerParser {
 
 
         getNextToken();
-        if (!currentToken.equals("("))
+        if (!currentToken.equals("(")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "This is write statement and you must have \"(\" before \"" + currentToken + "\"");
-
+        }
         getNextToken();
         // validate "write-item ( , write-item )*"
         writeList();
 
-        if (!currentToken.equals(")"))
+        if (!currentToken.equals(")")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "This is write statement and you must have \")\" after write items, before \"" + currentToken + "\"");
-
+        }
         getNextToken();
     }
 
@@ -472,9 +480,10 @@ public class CompilerParser {
         // validate "name-value relational-operation name-value"
         condition();
 
-        if (!currentToken.equals("then"))
+        if (!currentToken.equals("then")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must have \"then\" not \"" + currentToken + "\" after condition of if.");
-
+        }
         getNextToken();
         // validate "statement ( ; statement )*"
         stmtList();
@@ -484,9 +493,10 @@ public class CompilerParser {
 
         if (currentToken.equals("else")) elsePart(); // validate "else stmt-list | lambda"
 
-        if (!currentToken.equals("end"))
+        if (!currentToken.equals("end")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must have \"end\" not \"" + currentToken + "\" to end if statement.");
-
+        }
         getNextToken();
     }
 
@@ -498,9 +508,10 @@ public class CompilerParser {
         // validate "name-value relational-operation name-value"
         condition();
 
-        if (!currentToken.equals("then"))
+        if (!currentToken.equals("then")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must have \"then\" not \"" + currentToken + "\" after condition of elseif.");
-
+        }
         getNextToken();
         // validate "statement ( ; statement )*"
         stmtList();
@@ -523,16 +534,18 @@ public class CompilerParser {
         // validate "name-value relational-operation name-value"
         condition();
 
-        if (!currentToken.equals("do"))
+        if (!currentToken.equals("do")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must have \"do\" not \"" + currentToken + "\" after condition of while.");
-
+        }
         getNextToken();
         // validate "statement ( ; statement )*"
         stmtList();
 
-        if (!currentToken.equals("end"))
+        if (!currentToken.equals("end")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must have \"end\" not \"" + currentToken + "\" to end while statement.");
-
+        }
         getNextToken();
     }
 
@@ -544,9 +557,10 @@ public class CompilerParser {
         // validate "statement ( ; statement )*"
         stmtList();
 
-        if (!currentToken.equals("until"))
+        if (!currentToken.equals("until")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must have \"until\" not \"" + currentToken + "\" after stmt-list of repeat.");
-
+        }
         getNextToken();
         // validate "name-value relational-operation name-value"
         condition();
@@ -561,9 +575,10 @@ public class CompilerParser {
     }
 
     private void callProcedureName() {
-        if (!currentToken.equals(procedureName))
+        if (!currentToken.equals(procedureName)) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must use name that you entered in procedure-heading that is \"" + procedureName + "\" and you are using " + currentToken + ".");
-
+        }
     }
 
     private void condition() throws ParserException {
@@ -575,29 +590,33 @@ public class CompilerParser {
     }
 
     private void relationOperation() throws ParserException {
-        if (!currentToken.equals("=") && !currentToken.equals("|=") && !currentToken.equals("<") && !currentToken.equals("<=") && !currentToken.equals(">") && !currentToken.equals(">="))
+        if (!currentToken.equals("=") && !currentToken.equals("|=") && !currentToken.equals("<") && !currentToken.equals("<=") && !currentToken.equals(">") && !currentToken.equals(">=")) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "You must use one of relation operations {=, |=, <, <=, >, >=} not \"" + currentToken + "\".");
-
+        }
         getNextToken();
     }
 
     private void name() throws ParserException {
         // validate if token is valid name
-        if (!Character.isLetter(currentToken.charAt(0)))
+        if (!Character.isLetter(currentToken.charAt(0))) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "Name must start with letter and you are using \"" + currentToken + "\".");
-
+        }
         // validate if name is reserved word
-        if (reservedWords.contains(currentToken))
+        if (reservedWords.contains(currentToken)) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "Name can't be reserved word, you are using \"" + currentToken + "\".");
-
+        }
     }
 
 
     private void moduleName() throws ParserException {
         // validate that name in end of module is same as module-heading
-        if (!currentToken.equals(moduleName))
+        if (!currentToken.equals(moduleName)) {
+            scanner.close();
             throw new ParserException(scanner.getLineOfToken(), "When you are ending module, you must use name that you entered in module-heading that is \"" + moduleName + "\"" + ", and you are using " + currentToken);
-
+        }
         getNextToken();
     }
 
